@@ -1,0 +1,152 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rapido Ride Booking</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: Arial, sans-serif;
+      background: green; color: #202124;
+    }
+    header {
+      background: #ffd500; padding: 20px;
+      font-size: 27px; font-weight: 800;
+    }
+    main {
+      max-width: 500px; margin: 22px auto;
+      padding: 16px;
+    }
+    .card {
+      background: white; padding: 20px;
+      border-radius: 18px; margin-bottom: 16px;
+      box-shadow: 0 3px 15px #0000000c;
+    }
+    h2 { margin-top: 0; }
+    input {
+      width: 100%; padding: 15px;
+      margin: 7px 0; border: 1px solid #ddd;
+      border-radius: 10px; font-size: 16px;
+    }
+    .rides {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 8px; margin: 16px 0;
+    }
+    .ride {
+      padding: 14px 5px; background: white;
+      border: 2px solid #eee; border-radius: 12px;
+      cursor: pointer; text-align: center;
+    }
+    .ride.active { border-color: #e8bc00; background: #fffbea; }
+    .emoji { font-size: 27px; display: block; margin-bottom: 8px; }
+    button {
+      width: 100%; padding: 16px; border: 0;
+      border-radius: 12px; background: #ffd500;
+      font-weight: bold; font-size: 17px; cursor: pointer;
+    }
+    #result {
+      display: none; margin-top: 16px; padding: 14px;
+      background: #fffbea; border-radius: 12px;
+      line-height: 1.7;
+    }
+    .muted { color: #666; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <header> Rapido ⚡</header>
+
+  <main>
+    <section class="card">
+      <h2>Where are you going?</h2>
+      <input id="pickup" placeholder="📍 Enter pickup location">
+      <input id="drop" placeholder="🏁 Enter drop location">
+
+      <div class="rides">
+        <div class="ride active" data-type="Bike" data-fare="12">
+          <span class="emoji">🏍️</span>Bike
+          <p class="muted">₹12/km</p>
+        </div>
+        <div class="ride" data-type="Auto" data-fare="18">
+          <span class="emoji">🛺</span>Auto
+          <p class="muted">₹18/km</p>
+        </div>
+        <div class="ride" data-type="Cab" data-fare="25">
+          <span class="emoji">🚕</span>Cab
+          <p class="muted">₹25/km</p>
+        </div>
+      </div>
+
+      <label for="distance">Estimated distance (km)</label>
+      <input id="distance" type="number" min="1"
+             max="500" value="5">
+
+      <button onclick="bookRide()">Book Ride</button>
+      <div id="result" role="status"></div>
+    </section>
+
+    <section class="card">
+      <h3>Quick, affordable rides ⚡</h3>
+      <p>Choose your ride, enter your locations,
+         and get an estimated fare.</p>
+      <p class="muted">Demo application — no real driver is dispatched.</p>
+    </section>
+  </main>
+
+  <script>
+    let selectedRide = {
+      type: "Bike",
+      fare: 12
+    };
+
+    document.querySelectorAll(".ride").forEach(ride => {
+      ride.addEventListener("click", () => {
+        document.querySelectorAll(".ride").forEach(item =>
+          item.classList.remove("active")
+        );
+        ride.classList.add("active");
+        selectedRide.type = ride.dataset.type;
+        selectedRide.fare = Number(ride.dataset.fare);
+      });
+    });
+
+    function bookRide() {
+      const pickup = document.getElementById("pickup").value.trim();
+      const drop = document.getElementById("drop").value.trim();
+      const distance = Number(document.getElementById("distance").value);
+      const result = document.getElementById("result");
+
+      if (!pickup || !drop) {
+        alert("Please enter pickup and drop locations.");
+        return;
+      }
+
+      if (!Number.isFinite(distance) || distance < 1 || distance > 500) {
+        alert("Enter a distance between 1 and 500 km.");
+        return;
+      }
+
+      const total = Math.round(25 + distance * selectedRide.fare);
+
+      result.style.display = "block";
+      result.innerHTML = `
+        <h3>Ride Summary</h3>
+        <b>Vehicle:</b> ${selectedRide.type}<br>
+        <b>Pickup:</b> ${escapeHTML(pickup)}<br>
+        <b>Destination:</b> ${escapeHTML(drop)}<br>
+        <b>Distance:</b> ${distance} km<br>
+        <b>Estimated fare:</b> ₹${total}<br><br>
+        <b>Demo status:</b> Booking preview created.
+      `;
+    }
+
+    function escapeHTML(value) {
+      return value.replace(/[&<>"']/g, char => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;",
+        '"': "&quot;", "'": "&#39;"
+      })[char]);
+    }
+  </script>
+</body>
+</html>
